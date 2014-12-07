@@ -1,16 +1,8 @@
 /*
-	This program is distributed as public domain.
+	Instant ISO/IMG URL to Disk Drive.
+	Like unetbootin only bootin better!
+.
 	Author: Al Poole <netstar@gmail.com>
-	
-	About:
-	
-	Alternative to "dd".
-	Can do local: 
-		this if=file.iso of=/dev/sdb
-		also!
-		this if=http://somesite.com/music.iso of=/dev/sdc
-	
-	Unbuffered read/write.
 
 */
 #include <stdio.h>
