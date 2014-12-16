@@ -208,8 +208,8 @@ char *ChooseDistribution(void)
 	struct distro_t distros[9] = {
 		{"OpenBSD (i386)", "http://mirror.ox.ac.uk/pub/OpenBSD/5.6/i386/install56.fs"},
 		{"OpenBSD (amd64)", "http://mirror.ox.ac.uk/pub/OpenBSD/5.6/amd64/install56.fs"},
-		{"FreeBSD (i386)", "ftp://ftp.freebsd.org/pub/FreeBSD/releases/ISO-IMAGES/10.1/FreeBSD-10.1-RELEASE-i386-memstick.img"},
-		{"FreeBSD (amd64)", "ftp://ftp.freebsd.org/pub/FreeBSD/releases/ISO-IMAGES/10.1/FreeBSD-10.1-RELEASE-amd64-memstick.img"},		
+		{"FreeBSD (i386)", "http://ftp.freebsd.org/pub/FreeBSD/releases/ISO-IMAGES/10.1/FreeBSD-10.1-RELEASE-i386-memstick.img"},
+		{"FreeBSD (amd64)", "http://ftp.freebsd.org/pub/FreeBSD/releases/ISO-IMAGES/10.1/FreeBSD-10.1-RELEASE-amd64-memstick.img"},		
 		{"Debian (i386/amd64)", "http://caesar.acc.umu.se/debian-cd/7.7.0/multi-arch/iso-cd/debian-7.7.0-amd64-i386-netinst.iso"}, 
 		{"Ubuntu (i386)", "http://releases.ubuntu.com/14.10/ubuntu-14.10-desktop-i386.iso"},
 		{"Ubuntu (amd64)", "http://releases.ubuntu.com/14.10/ubuntu-14.10-desktop-amd64.iso"},
