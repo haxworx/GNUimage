@@ -205,7 +205,9 @@ char *ChooseDistribution(void)
 		char URL[1024];
 	};
 	
-	struct distro_t distros[9] = {
+	struct distro_t distros[11] = {
+		{"NetBSD (i386)", "http://ftp.netbsd.org/pub/NetBSD/iso/6.1.4/NetBSD-6.1.4-i386.iso" },
+		{"NetBSD (amd64)", "http://ftp.netbsd.org/pub/NetBSD/iso/6.1.4/NetBSD-6.1.4-amd64.iso"},
 		{"OpenBSD (i386)", "http://mirror.ox.ac.uk/pub/OpenBSD/5.6/i386/install56.fs"},
 		{"OpenBSD (amd64)", "http://mirror.ox.ac.uk/pub/OpenBSD/5.6/amd64/install56.fs"},
 		{"FreeBSD (i386)", "http://ftp.freebsd.org/pub/FreeBSD/releases/ISO-IMAGES/10.1/FreeBSD-10.1-RELEASE-i386-memstick.img"},
@@ -220,7 +222,7 @@ char *ChooseDistribution(void)
 	int i;
 
 	printf("Please choose an operating system to install to disk:\n\n");
-	for (i = 0; i < 9; i++) {
+	for (i = 0; i < 11; i++) {
 		printf("%d) %s\n", i, distros[i].name);
 	}
 
