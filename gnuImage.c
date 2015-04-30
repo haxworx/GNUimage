@@ -239,7 +239,7 @@ char *ChooseDistribution(void)
 
 	printf("GNUimage Installer: %s\n", timestamp);
 	printf("Brought to you by: \"Al Poole\" <netstar@gmail.com>\n\n");
-	printf("Please choose an operating system to install to disk:\n\n");
+	printf("Please choose an operating system to install to disk or file:\n\n");
 	for (i = 0; i < NUM_DISTROS; i++) {
 		printf("%02d) %s\n", i, distros[i].name);
 	}
@@ -288,7 +288,7 @@ char *ChooseDevice(void)
 	fflush(stdout);
 
 	char buffer[8192] = { 0 };
-	printf("[DANGEROUS] Enter full device path (e.g. /dev/sdb): ");
+	printf("[DANGEROUS] Enter path or press RETURN to save to current directory: ");
 	fflush(stdout);
 	fgets(buffer, sizeof(buffer), stdin);
 	Chomp(buffer);
@@ -296,9 +296,22 @@ char *ChooseDevice(void)
  	struct stat fstats;
 
 	if (stat(buffer, &fstats) < 0)
-		Scream("Device does not exist!");
+		return NULL;
 
 	return strdup(buffer);
+}
+
+char *GetFileName(char *URI)
+{
+	char *uri_copy = strdup(URI);
+
+	char *new_start = strrchr(uri_copy, '/');
+	if (new_start == NULL)
+		Scream("Program is broken!");
+
+	*new_start = '\0'; ++new_start;
+
+	return strdup(new_start);
 }
 
 int main(int argc, char **argv)
@@ -317,12 +330,12 @@ int main(int argc, char **argv)
 
 	outfile = ChooseDevice();
 	if (!outfile)
-		Scream("bogus outfile!!!");
+		outfile = GetFileName(infile);
 
 	int in_fd, out_fd, sock;
 	int length = 0;
 	
-	printf("Writing OS image to device %s.\n", outfile);
+	printf("Writing OS image to %s.\n", outfile);
 
 	if (get_from_web) {
 		char *filename = strdup(FileFromURL(infile));
