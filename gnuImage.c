@@ -8,9 +8,7 @@
 	
 	You've heard of unetbootin? This one is for the command-line.
 	
-	Supports: HTTP 
-	Coming: HTTPS
-
+	Supports: HTTP and HTTPS
 */
 
 #include <stdio.h>
@@ -69,14 +67,25 @@ BIO *Connect_SSL(char *hostname, int port)
 
 	sprintf(bio_addr, "%s:%d", hostname, port);
 	
-	bio = BIO_new_connect(bio_addr);
-	if (bio == NULL)
-		Scream("BIO_new_connect");
+	SSL_library_init(); // missing?
 
-	printf("host is %s and port is %d and string is %s\n", hostname, port, bio_addr);
+	SSL_CTX *ctx = SSL_CTX_new(SSLv23_client_method());
+	SSL *ssl;
+	
+	
+	SSL_CTX_load_verify_locations(ctx, "/etc/ssl/certs", NULL);
+		
+	bio = BIO_new_ssl_connect(ctx);
+	if (bio == NULL)
+		Scream("BIO_new_ssl_connect");
+
+	
+	BIO_get_ssl(bio, &ssl);
+	SSL_set_mode(ssl, SSL_MODE_AUTO_RETRY);
+	BIO_set_conn_hostname(bio, bio_addr);
+
 	if (BIO_do_connect(bio) <= 0)
 		Scream("Unable to connect");
-
 
 	return bio;
 }
@@ -204,9 +213,8 @@ ssize_t ReadHeader(int sock, BIO *bio, header_t * headers)
 				bytes = BIO_read(bio, &buf[len], 1);
 			
 			len += bytes;
-			//printf("bytes is %d and byte is '%c'\n", bytes, buf[len]);
-
 		}
+
 		buf[len] = '\0';
 		len = 0;
 
@@ -241,20 +249,16 @@ int Headers(int sock, BIO *bio, char *addr, char *file)
 		len = write(sock, out, strlen(out));
 	} else {
 		len = BIO_write(bio, out, strlen(out));
-	}	
-	
+	}
+
 	len = 0;
 
 	do {
 		len = ReadHeader(sock, bio, &headers);
 	} while (!len);
 
-
-	printf("len is %d and %d\n", len, headers.content_length);
-
 	if (!headers.content_length)
 		Scream("bad headers!");
-
 
 	return headers.content_length;
 }
@@ -400,12 +404,7 @@ int main(int argc, char **argv)
 	
 	printf("Writing OS image to %s.\n", outfile);
 
-	
-
 	BIO *bio = NULL;
-
-	if (bio)
-		puts("SSL IS WORKING");	
 
 	if (get_from_web) {
 		char *filename = strdup(FileFromURL(infile));
@@ -414,8 +413,8 @@ int main(int argc, char **argv)
 			if (!is_ssl)
 				sock = in_fd = Connect(address, 80);
 			else
-				bio = Connect_SSL(address, 80);
-		
+				bio = Connect_SSL(address, 443);
+
 			length = Headers(sock, bio, address, filename);		
 		} else
 			Scream("MacBorken URL");
@@ -436,18 +435,19 @@ int main(int argc, char **argv)
 
 	int total = 0;
 
-	read(in_fd, buf, 1);	
+	if (bio)
+		BIO_read(bio, buf, 1);
+	else	
+		read(in_fd, buf, 1);	
 
 	do {
 
 		if (bio == NULL)
-			bytes = read(in_fd, buf, bs);
-			if (bytes <= 0)
-				break;		
+			bytes = read(in_fd, buf, bs);	
 		else
 			bytes = BIO_read(bio, buf, bs);
-
-		
+			if (bytes <= 0)
+				break;
 
 		chunk = bytes;
 
