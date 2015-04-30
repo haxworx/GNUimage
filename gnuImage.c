@@ -272,12 +272,12 @@ char *ChooseDistribution(void)
 		int is_ssl;
 	};
 	
-	#define NUM_DISTROS 14
+	#define NUM_DISTROS 13
 
 
 	char *timestamp = "2015-05-01";
+
 	struct distro_t distros[NUM_DISTROS] = {
-		//{"Haiku OS (x86)", "http://download.haiku-os.org/nightly-images/x86_gcc2_hybrid/current-anyboot"},
 		{"NetBSD v6.1.5 (x86)", "http://mirror.planetunix.net/pub/NetBSD/iso/6.1.5/NetBSD-6.1.5-i386.iso", 0},
 		{"NetBSD v6.1.5 (x86_64)", "http://mirror.planetunix.net/pub/NetBSD/iso/6.1.5/NetBSD-6.1.5-amd64.iso", 0},
 		{"OpenBSD v5.7 (x86)", "http://mirror.ox.ac.uk/pub/OpenBSD/5.7/i386/install57.fs", 0},
@@ -289,10 +289,8 @@ char *ChooseDistribution(void)
 		{"Fedora v21 (x86_64)", "http://www.mirrorservice.org/sites/dl.fedoraproject.org/pub/fedora/linux/releases/21/Workstation/x86_64/iso/Fedora-Live-Workstation-x86_64-21-5.iso", 0},		
 		{"OpenSUSE v13.2 (x86)", "http://anorien.csc.warwick.ac.uk/mirrors/download.opensuse.org/distribution/13.2/iso/openSUSE-13.2-DVD-i586.iso", 0},
 		{"OpenSUSE v13.2 (x86_64)","http://anorien.csc.warwick.ac.uk/mirrors/download.opensuse.org/distribution/13.2/iso/openSUSE-13.2-DVD-x86_64.iso", 0},
-
-		{"LinuxMint v17.1 [Cinammon] (x86)", "http://mirrors.kernel.org/linuxmint//stable/17.1/linuxmint-17.1-cinnamon-32bit.iso", 0},
-		{"LinuxMint v17.1 [Cinammon] (x86_64)", "http://mirrors.kernel.org/linuxmint//stable/17.1/linuxmint-17.1-cinnamon-64bit.iso", 0},
-		{"A HTTPS ONE", "https://mirrors.kernel.org/linuxmint//stable/17.1/linuxmint-17.1-cinnamon-32bit.iso", 1},
+		{"LinuxMint v17.1 [Cinammon] (x86)", "https://mirrors.kernel.org/linuxmint//stable/17.1/linuxmint-17.1-cinnamon-32bit.iso", 1 },
+		{"LinuxMint v17.1 [Cinammon] (x86_64)", "https://mirrors.kernel.org/linuxmint//stable/17.1/linuxmint-17.1-cinnamon-64bit.iso", 1},
 	};
 
 	int i;
@@ -301,7 +299,7 @@ char *ChooseDistribution(void)
 	printf("Brought to you by: \"Al Poole\" <netstar@gmail.com>\n\n");
 	printf("Please choose an operating system to install to disk or file:\n\n");
 	for (i = 0; i < NUM_DISTROS; i++) {
-		printf("%02d) %s\n", i, distros[i].name);
+		printf("%2.1d) %s\n", i, distros[i].name);
 	}
 
 	printf("choice: ");
@@ -315,7 +313,7 @@ char *ChooseDistribution(void)
 	int choice = atoi(buffer);
 	
 	if (choice < 0 || choice > NUM_DISTROS)
-		Scream("Invalid HUMAN input");	
+		Scream("Choice out of range!");	
 
 	return strdup(distros[choice].URL);
 }
