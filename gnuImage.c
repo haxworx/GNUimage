@@ -1,10 +1,18 @@
 /*
 	Instant ISO/IMG URL to Disk Drive.
-	Like unetbootin only bootin better!
+	
+	Images up-to-date as of: 2015-05-01
 .
-	Author: Al Poole <netstar@gmail.com>
+	email: Al Poole <netstar@gmail.com>
+	www: http://haxlab.org
+	
+	You've heard of unetbootin? This one is for the command-line.
+	
+	Supports: HTTP 
+	Coming: HTTPS
 
 */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -205,25 +213,35 @@ char *ChooseDistribution(void)
 		char URL[1024];
 	};
 	
-	struct distro_t distros[11] = {
-		{"NetBSD (i386)", "http://ftp.netbsd.org/pub/NetBSD/iso/6.1.4/NetBSD-6.1.4-i386.iso" },
-		{"NetBSD (amd64)", "http://ftp.netbsd.org/pub/NetBSD/iso/6.1.4/NetBSD-6.1.4-amd64.iso"},
-		{"OpenBSD (i386)", "http://mirror.ox.ac.uk/pub/OpenBSD/5.6/i386/install56.fs"},
-		{"OpenBSD (amd64)", "http://mirror.ox.ac.uk/pub/OpenBSD/5.6/amd64/install56.fs"},
-		{"FreeBSD (i386)", "http://ftp.freebsd.org/pub/FreeBSD/releases/ISO-IMAGES/10.1/FreeBSD-10.1-RELEASE-i386-memstick.img"},
-		{"FreeBSD (amd64)", "http://ftp.freebsd.org/pub/FreeBSD/releases/ISO-IMAGES/10.1/FreeBSD-10.1-RELEASE-amd64-memstick.img"},		
-		{"Debian (i386/amd64)", "http://caesar.acc.umu.se/debian-cd/7.7.0/multi-arch/iso-cd/debian-7.7.0-amd64-i386-netinst.iso"}, 
-		{"Ubuntu (i386)", "http://releases.ubuntu.com/14.10/ubuntu-14.10-desktop-i386.iso"},
-		{"Ubuntu (amd64)", "http://releases.ubuntu.com/14.10/ubuntu-14.10-desktop-amd64.iso"},
-		{"LinuxMint [Cinammon] (i386)", "http://mirrors.kernel.org/linuxmint//stable/17.1/linuxmint-17.1-cinnamon-32bit.iso"},
-		{"LinuxMint [Cinammon] (amd64)", "http://mirrors.kernel.org/linuxmint//stable/17.1/linuxmint-17.1-cinnamon-64bit.iso"},
+	#define NUM_DISTROS 13
+
+
+	char *timestamp = "2015-05-01";
+	struct distro_t distros[NUM_DISTROS] = {
+		//{"Haiku OS (x86)", "http://download.haiku-os.org/nightly-images/x86_gcc2_hybrid/current-anyboot"},
+		{"NetBSD v6.1.5 (x86)", "http://mirror.planetunix.net/pub/NetBSD/iso/6.1.5/NetBSD-6.1.5-i386.iso" },
+		{"NetBSD v6.1.5 (x86_64)", "http://mirror.planetunix.net/pub/NetBSD/iso/6.1.5/NetBSD-6.1.5-amd64.iso"},
+		{"OpenBSD v5.7 (x86)", "http://mirror.ox.ac.uk/pub/OpenBSD/5.7/i386/install57.fs"},
+		{"OpenBSD v5.7 (x86_64)", "http://mirror.ox.ac.uk/pub/OpenBSD/5.7/amd64/install57.fs"},
+		{"FreeBSD v10.1 (x86)", "http://ftp.freebsd.org/pub/FreeBSD/releases/ISO-IMAGES/10.1/FreeBSD-10.1-RELEASE-i386-memstick.img"},
+		{"FreeBSD v10.1 (x86_64)", "http://ftp.freebsd.org/pub/FreeBSD/releases/ISO-IMAGES/10.1/FreeBSD-10.1-RELEASE-amd64-memstick.img"},		
+		{"Debian v8.0 (x86/x86_64)", "http://caesar.acc.umu.se/debian-cd/8.0.0/multi-arch/iso-cd/debian-8.0.0-amd64-i386-netinst.iso"}, 
+		{"Fedora v21 (x86)", "http://www.mirrorservice.org/sites/dl.fedoraproject.org/pub/fedora/linux/releases/21/Workstation/i386/iso/Fedora-Live-Workstation-i686-21-5.iso"},		
+		{"Fedora v21 (x86_64)", "http://www.mirrorservice.org/sites/dl.fedoraproject.org/pub/fedora/linux/releases/21/Workstation/x86_64/iso/Fedora-Live-Workstation-x86_64-21-5.iso"},		
+		{"OpenSUSE v13.2 (x86)", "http://anorien.csc.warwick.ac.uk/mirrors/download.opensuse.org/distribution/13.2/iso/openSUSE-13.2-DVD-i586.iso"},
+		{"OpenSUSE v13.2 (x86_64)","http://anorien.csc.warwick.ac.uk/mirrors/download.opensuse.org/distribution/13.2/iso/openSUSE-13.2-DVD-x86_64.iso"},
+
+		{"LinuxMint v17.1 [Cinammon] (x86)", "http://mirrors.kernel.org/linuxmint//stable/17.1/linuxmint-17.1-cinnamon-32bit.iso"},
+		{"LinuxMint v17.1 [Cinammon] (x86_64)", "http://mirrors.kernel.org/linuxmint//stable/17.1/linuxmint-17.1-cinnamon-64bit.iso"},
 	};
 
 	int i;
 
+	printf("GNUimage Installer: %s\n", timestamp);
+	printf("Brought to you by: \"Al Poole\" <netstar@gmail.com>\n\n");
 	printf("Please choose an operating system to install to disk:\n\n");
-	for (i = 0; i < 11; i++) {
-		printf("%d) %s\n", i, distros[i].name);
+	for (i = 0; i < NUM_DISTROS; i++) {
+		printf("%02d) %s\n", i, distros[i].name);
 	}
 
 	printf("choice: ");
@@ -236,7 +254,7 @@ char *ChooseDistribution(void)
 
 	int choice = atoi(buffer);
 	
-	if (choice < 0 || choice > 7)
+	if (choice < 0 || choice > NUM_DISTROS)
 		Scream("Invalid HUMAN input");	
 
 	return strdup(distros[choice].URL);
@@ -333,8 +351,6 @@ int main(int argc, char **argv)
 
 	read(in_fd, buf, 1);	
 
-	int last = 0;
-
 	do {
 		bytes = read(in_fd, buf, bs);
 		if (bytes <= 0)
@@ -355,14 +371,12 @@ int main(int argc, char **argv)
 		if (current > 100)
 			current = 100;
 
-		if (current != last) {
-			printf
-		   	 ("                                                    \r");
-			printf("%d%% %d bytes of %d bytes\r", current, total,
+		printf
+	   	 ("                                                    \r");
+		printf("%d%% %d bytes of %d bytes\r", current, total,
 		       length);
-			fflush(stdout);
-		}
-		last = current;
+		fflush(stdout);
+
 		memset(buf, 0, bytes);								  // faster
 	} while (total < length);
 
