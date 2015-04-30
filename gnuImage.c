@@ -28,6 +28,12 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+#include <openssl/bio.h>
+#include <openssl/ssl.h>
+#include <openssl/err.h>
+
+
+
 void Scream(char *fmt, ...)
 {
 	char buf[8192] = { 0 };
@@ -41,6 +47,13 @@ void Scream(char *fmt, ...)
 	exit(EXIT_FAILURE);
 }
 
+void init_ssl(void)
+{
+	SSL_load_error_strings();
+	ERR_load_BIO_strings();
+	OpenSSL_add_all_algorithms();
+}
+
 void Say(char *phrase)
 {
 	char buf[1024] = { 0 };
@@ -49,6 +62,24 @@ void Say(char *phrase)
 	printf(buf);
 }
 
+BIO *Connect_SSL(char *hostname, int port)
+{
+	BIO *bio = NULL;
+	char bio_addr[8192] = { 0 };
+
+	sprintf(bio_addr, "%s:%d", hostname, port);
+	
+	bio = BIO_new_connect(bio_addr);
+	if (bio == NULL)
+		Scream("BIO_new_connect");
+
+	printf("host is %s and port is %d and string is %s\n", hostname, port, bio_addr);
+	if (BIO_do_connect(bio) <= 0)
+		Scream("Unable to connect");
+
+
+	return bio;
+}
 
 int Connect(char *hostname, int port)
 {
@@ -116,12 +147,21 @@ char *FileFromURL(char *addr)
 
 char *HostFromURL(char *addr)
 {
+	char *end = NULL;
+
 	char *str = strstr(addr, "http://");
 	if (str) {
 		addr += strlen("http://");
-		char *end = strchr(addr, '/');
+		end = strchr(addr, '/');
 		*end = '\0';
 		return addr;
+	} else if (str = strstr(addr, "https://")) {
+		if (str) {
+			addr += strlen("https://");
+			end = strchr(addr, '/');
+			*end = '\0';
+			return addr;
+		}
 	}
 
 	Scream("Invalid URL");
@@ -151,15 +191,20 @@ struct header_t {
 	int status;
 };
 
-ssize_t ReadHeader(int sock, header_t * headers)
+ssize_t ReadHeader(int sock, BIO *bio, header_t * headers)
 {
 	int bytes = -1;
 	int len = 0;
 	char buf[8192] = { 0 };
 	while (1) {
 		while (buf[len - 1] != '\r' && buf[len] != '\n') {
-			bytes = read(sock, &buf[len], 1);
+			if (bio == NULL)			
+				bytes = read(sock, &buf[len], 1);
+			else
+				bytes = BIO_read(bio, &buf[len], 1);
+			
 			len += bytes;
+			//printf("bytes is %d and byte is '%c'\n", bytes, buf[len]);
 
 		}
 		buf[len] = '\0';
@@ -181,7 +226,7 @@ ssize_t ReadHeader(int sock, header_t * headers)
 	return 0;										  // not found
 }
 
-int Headers(int sock, char *addr, char *file)
+int Headers(int sock, BIO *bio, char *addr, char *file)
 {
 	char out[8192] = { 0 };
 	header_t headers;
@@ -189,14 +234,23 @@ int Headers(int sock, char *addr, char *file)
 	memset(&headers, 0, sizeof(header_t));
 
 	sprintf(out, "GET %s HTTP/1.1\r\nHost: %s\r\n\r\n", file, addr);
-	write(sock, out, strlen(out));
 
 	ssize_t len = 0;
 
+	if (bio == NULL) {
+		len = write(sock, out, strlen(out));
+	} else {
+		len = BIO_write(bio, out, strlen(out));
+	}	
+	
+	len = 0;
+
 	do {
-		len = ReadHeader(sock, &headers);
+		len = ReadHeader(sock, bio, &headers);
 	} while (!len);
 
+
+	printf("len is %d and %d\n", len, headers.content_length);
 
 	if (!headers.content_length)
 		Scream("bad headers!");
@@ -211,28 +265,30 @@ char *ChooseDistribution(void)
 	struct distro_t {
 		char name[1024];
 		char URL[1024];
+		int is_ssl;
 	};
 	
-	#define NUM_DISTROS 13
+	#define NUM_DISTROS 14
 
 
 	char *timestamp = "2015-05-01";
 	struct distro_t distros[NUM_DISTROS] = {
 		//{"Haiku OS (x86)", "http://download.haiku-os.org/nightly-images/x86_gcc2_hybrid/current-anyboot"},
-		{"NetBSD v6.1.5 (x86)", "http://mirror.planetunix.net/pub/NetBSD/iso/6.1.5/NetBSD-6.1.5-i386.iso" },
-		{"NetBSD v6.1.5 (x86_64)", "http://mirror.planetunix.net/pub/NetBSD/iso/6.1.5/NetBSD-6.1.5-amd64.iso"},
-		{"OpenBSD v5.7 (x86)", "http://mirror.ox.ac.uk/pub/OpenBSD/5.7/i386/install57.fs"},
-		{"OpenBSD v5.7 (x86_64)", "http://mirror.ox.ac.uk/pub/OpenBSD/5.7/amd64/install57.fs"},
-		{"FreeBSD v10.1 (x86)", "http://ftp.freebsd.org/pub/FreeBSD/releases/ISO-IMAGES/10.1/FreeBSD-10.1-RELEASE-i386-memstick.img"},
-		{"FreeBSD v10.1 (x86_64)", "http://ftp.freebsd.org/pub/FreeBSD/releases/ISO-IMAGES/10.1/FreeBSD-10.1-RELEASE-amd64-memstick.img"},		
-		{"Debian v8.0 (x86/x86_64)", "http://caesar.acc.umu.se/debian-cd/8.0.0/multi-arch/iso-cd/debian-8.0.0-amd64-i386-netinst.iso"}, 
-		{"Fedora v21 (x86)", "http://www.mirrorservice.org/sites/dl.fedoraproject.org/pub/fedora/linux/releases/21/Workstation/i386/iso/Fedora-Live-Workstation-i686-21-5.iso"},		
-		{"Fedora v21 (x86_64)", "http://www.mirrorservice.org/sites/dl.fedoraproject.org/pub/fedora/linux/releases/21/Workstation/x86_64/iso/Fedora-Live-Workstation-x86_64-21-5.iso"},		
-		{"OpenSUSE v13.2 (x86)", "http://anorien.csc.warwick.ac.uk/mirrors/download.opensuse.org/distribution/13.2/iso/openSUSE-13.2-DVD-i586.iso"},
-		{"OpenSUSE v13.2 (x86_64)","http://anorien.csc.warwick.ac.uk/mirrors/download.opensuse.org/distribution/13.2/iso/openSUSE-13.2-DVD-x86_64.iso"},
+		{"NetBSD v6.1.5 (x86)", "http://mirror.planetunix.net/pub/NetBSD/iso/6.1.5/NetBSD-6.1.5-i386.iso", 0},
+		{"NetBSD v6.1.5 (x86_64)", "http://mirror.planetunix.net/pub/NetBSD/iso/6.1.5/NetBSD-6.1.5-amd64.iso", 0},
+		{"OpenBSD v5.7 (x86)", "http://mirror.ox.ac.uk/pub/OpenBSD/5.7/i386/install57.fs", 0},
+		{"OpenBSD v5.7 (x86_64)", "http://mirror.ox.ac.uk/pub/OpenBSD/5.7/amd64/install57.fs", 0},
+		{"FreeBSD v10.1 (x86)", "http://ftp.freebsd.org/pub/FreeBSD/releases/ISO-IMAGES/10.1/FreeBSD-10.1-RELEASE-i386-memstick.img", 0},
+		{"FreeBSD v10.1 (x86_64)", "http://ftp.freebsd.org/pub/FreeBSD/releases/ISO-IMAGES/10.1/FreeBSD-10.1-RELEASE-amd64-memstick.img", 0},		
+		{"Debian v8.0 (x86/x86_64)", "http://caesar.acc.umu.se/debian-cd/8.0.0/multi-arch/iso-cd/debian-8.0.0-amd64-i386-netinst.iso", 0}, 
+		{"Fedora v21 (x86)", "http://www.mirrorservice.org/sites/dl.fedoraproject.org/pub/fedora/linux/releases/21/Workstation/i386/iso/Fedora-Live-Workstation-i686-21-5.iso", 0},		
+		{"Fedora v21 (x86_64)", "http://www.mirrorservice.org/sites/dl.fedoraproject.org/pub/fedora/linux/releases/21/Workstation/x86_64/iso/Fedora-Live-Workstation-x86_64-21-5.iso", 0},		
+		{"OpenSUSE v13.2 (x86)", "http://anorien.csc.warwick.ac.uk/mirrors/download.opensuse.org/distribution/13.2/iso/openSUSE-13.2-DVD-i586.iso", 0},
+		{"OpenSUSE v13.2 (x86_64)","http://anorien.csc.warwick.ac.uk/mirrors/download.opensuse.org/distribution/13.2/iso/openSUSE-13.2-DVD-x86_64.iso", 0},
 
-		{"LinuxMint v17.1 [Cinammon] (x86)", "http://mirrors.kernel.org/linuxmint//stable/17.1/linuxmint-17.1-cinnamon-32bit.iso"},
-		{"LinuxMint v17.1 [Cinammon] (x86_64)", "http://mirrors.kernel.org/linuxmint//stable/17.1/linuxmint-17.1-cinnamon-64bit.iso"},
+		{"LinuxMint v17.1 [Cinammon] (x86)", "http://mirrors.kernel.org/linuxmint//stable/17.1/linuxmint-17.1-cinnamon-32bit.iso", 0},
+		{"LinuxMint v17.1 [Cinammon] (x86_64)", "http://mirrors.kernel.org/linuxmint//stable/17.1/linuxmint-17.1-cinnamon-64bit.iso", 0},
+		{"A HTTPS ONE", "https://mirrors.kernel.org/linuxmint//stable/17.1/linuxmint-17.1-cinnamon-32bit.iso", 1},
 	};
 
 	int i;
@@ -320,13 +376,20 @@ int main(int argc, char **argv)
 	char *infile = NULL;
 	char *outfile = "test";
 	int get_from_web = 0;
+	int is_ssl = 0;
 
 	infile = ChooseDistribution();
 	if (infile) {
 		get_from_web = 1;
-		if (strncmp("http://", infile, 7))
+		if (!strncmp("https://", infile, 8))
+			is_ssl = 1;
+
+		if (strncmp("http://", infile, 7) && strncmp("https://", infile, 8))
 			Scream("internal mess!");
 	}
+
+	if (is_ssl)
+		init_ssl();
 
 	outfile = ChooseDevice();
 	if (!outfile)
@@ -337,12 +400,23 @@ int main(int argc, char **argv)
 	
 	printf("Writing OS image to %s.\n", outfile);
 
+	
+
+	BIO *bio = NULL;
+
+	if (bio)
+		puts("SSL IS WORKING");	
+
 	if (get_from_web) {
 		char *filename = strdup(FileFromURL(infile));
 		char *address = strdup(HostFromURL(infile));
 		if (filename && address) {
-			sock = in_fd = Connect(address, 80);
-			length = Headers(sock, address, filename);
+			if (!is_ssl)
+				sock = in_fd = Connect(address, 80);
+			else
+				bio = Connect_SSL(address, 80);
+		
+			length = Headers(sock, bio, address, filename);		
 		} else
 			Scream("MacBorken URL");
 	}
@@ -365,14 +439,22 @@ int main(int argc, char **argv)
 	read(in_fd, buf, 1);	
 
 	do {
-		bytes = read(in_fd, buf, bs);
-		if (bytes <= 0)
-			break;
+
+		if (bio == NULL)
+			bytes = read(in_fd, buf, bs);
+			if (bytes <= 0)
+				break;		
+		else
+			bytes = BIO_read(bio, buf, bs);
+
+		
 
 		chunk = bytes;
 
 		while (chunk) {
-			ssize_t count = write(out_fd, buf, chunk);
+			ssize_t count = 0;
+			count = write(out_fd, buf, chunk);
+			
 			if (count <= 0)
 				break;
 
@@ -395,6 +477,8 @@ int main(int argc, char **argv)
 
 	printf("\r\ndone!\n");
 
+	BIO_free_all(bio);
+	
 	close(out_fd);
 	close(in_fd);
 
