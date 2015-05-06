@@ -38,7 +38,7 @@ void Scream(char *fmt, ...)
 	va_list ap;
 
 	va_start(ap, fmt);
-	sprintf(buf, "Nooo! %s\n", fmt);
+	snprintf(buf, sizeof(buf), "Nooo! %s\n", fmt);
 	va_end(ap);
 	fprintf(stderr, buf);
 
@@ -56,7 +56,7 @@ void Say(char *phrase)
 {
 	char buf[1024] = { 0 };
 
-	sprintf(buf, "%s\n", phrase);
+	snprintf(buf, sizeof(buf), "%s\n", phrase);
 	printf(buf);
 }
 
@@ -65,7 +65,7 @@ BIO *Connect_SSL(char *hostname, int port)
 	BIO *bio = NULL;
 	char bio_addr[8192] = { 0 };
 
-	sprintf(bio_addr, "%s:%d", hostname, port);
+	snprintf(bio_addr, sizeof(bio_addr), "%s:%d", hostname, port);
 	
 	SSL_library_init(); // missing?
 
@@ -164,13 +164,14 @@ char *HostFromURL(char *addr)
 		end = strchr(addr, '/');
 		*end = '\0';
 		return addr;
-	} else if (str = strstr(addr, "https://")) {
-		if (str) {
-			addr += strlen("https://");
-			end = strchr(addr, '/');
-			*end = '\0';
-			return addr;
-		}
+	} 
+
+	str = strstr(addr, "https://");
+	if (str) {
+		addr += strlen("https://");
+		end = strchr(addr, '/');
+		*end = '\0';
+		return addr;
 	}
 
 	Scream("Invalid URL");
@@ -241,7 +242,7 @@ int Headers(int sock, BIO *bio, char *addr, char *file)
 
 	memset(&headers, 0, sizeof(header_t));
 
-	sprintf(out, "GET %s HTTP/1.1\r\nHost: %s\r\n\r\n", file, addr);
+	snprintf(out, sizeof(out), "GET %s HTTP/1.1\r\nHost: %s\r\n\r\n", file, addr);
 
 	ssize_t len = 0;
 
@@ -295,14 +296,13 @@ char *ChooseDistribution(void)
 
 	int i;
 
-	printf("GNUimage Installer: %s\n", timestamp);
-	printf("Brought to you by: \"Al Poole\" <netstar@gmail.com>\n\n");
-	printf("Please choose an operating system to install to disk or file:\n\n");
+	printf("Brought to you by: \"Al Poole\" <netstar@gmail.com>. Updated %s.\n\n", timestamp);
+	printf("\nPlease choose an operating system to install to disk or file:\n\n");
 	for (i = 0; i < NUM_DISTROS; i++) {
 		printf("%2.1d) %s\n", i, distros[i].name);
 	}
 
-	printf("choice: ");
+	printf("\nchoice: ");
 	fflush(stdout);
 
 	char buffer[8192] = { 0 };
@@ -320,6 +320,7 @@ char *ChooseDistribution(void)
 
 void CheckDevices(void)
 {
+	return; // BSD doesn't have lsblk
 	char buf[8192] = { 0 };
 	char result[8192] = { 0 };
 	FILE *f = popen("/bin/lsblk", "r");
@@ -387,7 +388,7 @@ int main(int argc, char **argv)
 			is_ssl = 1;
 
 		if (strncmp("http://", infile, 7) && strncmp("https://", infile, 8))
-			Scream("internal mess!");
+			Scream("Bad URL");
 	}
 
 	if (is_ssl)
@@ -438,6 +439,11 @@ int main(int argc, char **argv)
 	else	
 		read(in_fd, buf, 1);	
 
+	unsigned char result[SHA256_DIGEST_LENGTH] = { 0 };
+	SHA256_CTX ctx;
+	
+	SHA256_Init(&ctx);
+
 	do {
 
 		if (bio == NULL)
@@ -448,6 +454,8 @@ int main(int argc, char **argv)
 				break;
 
 		chunk = bytes;
+
+		SHA256_Update(&ctx, buf, bytes);
 
 		while (chunk) {
 			ssize_t count = 0;
@@ -473,7 +481,16 @@ int main(int argc, char **argv)
 		memset(buf, 0, bytes);								  // faster
 	} while (total < length);
 
-	printf("\r\ndone!\n");
+	SHA256_Final(result, &ctx);
+
+	int i = 0;
+
+	printf("SHA256 (%s) = ", outfile); fflush(stdout);
+	for (i = 0; i < SHA256_DIGEST_LENGTH; i++)
+		printf("%02x", (unsigned int) result[i]);
+
+	printf("\n");
+	printf("done!\n");
 
 	BIO_free_all(bio);
 	
