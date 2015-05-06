@@ -1,4 +1,4 @@
-CFLAGS=-g -Wall -std=c99 -pedantic
+CFLAGS=-g -Wall -pedantic -std=c11 
 OUTFILE=gnuImage
 INSTALL_DESTINATION=/usr/local/bin
 

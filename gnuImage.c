@@ -32,7 +32,8 @@ char *strdup(const char *s);
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 
-
+#define h_addr h_addr_list[0]
+// fix
 
 void Scream(char *fmt, ...)
 {
@@ -317,13 +318,15 @@ char *ChooseDistribution(void)
 	if (choice < 0 || choice > NUM_DISTROS)
 		Scream("Choice out of range!");	
 
-	return strdup(distros[choice].URL);
+	char *url = strdup(distros[choice].URL);
+	return url;
 }
 
 void CheckDevices(void)
 {
 	return; // BSD doesn't have lsblk
-	char buf[8192] = { 0 };
+
+/*	char buf[8192] = { 0 };
 	char result[8192] = { 0 };
 	FILE *f = popen("/bin/lsblk", "r");
 	if (!f) {
@@ -339,6 +342,7 @@ void CheckDevices(void)
 	}
 
 	pclose(f);
+*/
 }
 
 char *ChooseDevice(void)
