@@ -18,11 +18,11 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <sys/select.h>
+#include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
 #include <sys/time.h>
-#include <sys/select.h>
-#include <sys/socket.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 
