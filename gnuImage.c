@@ -1,15 +1,16 @@
 /*
 	Instant ISO/IMG URL to Disk Drive.
 	
-	Images up-to-date as of: 2015-05-01
-.
 	email: Al Poole <netstar@gmail.com>
 	www: http://haxlab.org
 	
 	You've heard of unetbootin? This one is for the command-line.
 	
 	Supports: HTTP and HTTPS
+
 */
+
+#define _BSD_SOURCE 1
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -279,7 +280,7 @@ char *ChooseDistribution(void)
 	#define NUM_DISTROS 13
 
 
-	char *timestamp = "2015-05-01";
+	char *timestamp = "2015-06-10";
 
 	struct distro_t distros[NUM_DISTROS] = {
 		{"NetBSD v6.1.5 (x86)", "http://mirror.planetunix.net/pub/NetBSD/iso/6.1.5/NetBSD-6.1.5-i386.iso", 0},
@@ -288,9 +289,9 @@ char *ChooseDistribution(void)
 		{"OpenBSD v5.7 (x86_64)", "http://mirror.ox.ac.uk/pub/OpenBSD/5.7/amd64/install57.fs", 0},
 		{"FreeBSD v10.1 (x86)", "http://ftp.freebsd.org/pub/FreeBSD/releases/ISO-IMAGES/10.1/FreeBSD-10.1-RELEASE-i386-memstick.img", 0},
 		{"FreeBSD v10.1 (x86_64)", "http://ftp.freebsd.org/pub/FreeBSD/releases/ISO-IMAGES/10.1/FreeBSD-10.1-RELEASE-amd64-memstick.img", 0},		
-		{"Debian v8.0 (x86/x86_64)", "http://caesar.acc.umu.se/debian-cd/8.0.0/multi-arch/iso-cd/debian-8.0.0-amd64-i386-netinst.iso", 0}, 
-		{"Fedora v21 (x86)", "http://www.mirrorservice.org/sites/dl.fedoraproject.org/pub/fedora/linux/releases/21/Workstation/i386/iso/Fedora-Live-Workstation-i686-21-5.iso", 0},		
-		{"Fedora v21 (x86_64)", "http://www.mirrorservice.org/sites/dl.fedoraproject.org/pub/fedora/linux/releases/21/Workstation/x86_64/iso/Fedora-Live-Workstation-x86_64-21-5.iso", 0},		
+		{"Debian v8.1 (x86/x86_64)", "http://ftp.acc.umu.se/debian-cd/8.1.0/multi-arch/iso-cd/debian-8.1.0-amd64-i386-netinst.iso", 0}, 
+		{"Fedora v22 (x86)", "http://download.fedoraproject.org/pub/fedora/linux/releases/22/Workstation/i386/iso/Fedora-Live-Workstation-i686-22-3.iso", 0},		
+		{"Fedora v22 (x86_64)", "http://download.fedoraproject.org/pub/fedora/linux/releases/22/Workstation/x86_64/iso/Fedora-Live-Workstation-x86_64-22-3.iso", 0},		
 		{"OpenSUSE v13.2 (x86)", "http://anorien.csc.warwick.ac.uk/mirrors/download.opensuse.org/distribution/13.2/iso/openSUSE-13.2-DVD-i586.iso", 0},
 		{"OpenSUSE v13.2 (x86_64)","http://anorien.csc.warwick.ac.uk/mirrors/download.opensuse.org/distribution/13.2/iso/openSUSE-13.2-DVD-x86_64.iso", 0},
 		{"LinuxMint v17.1 [Cinammon] (x86)", "https://mirrors.kernel.org/linuxmint//stable/17.1/linuxmint-17.1-cinnamon-32bit.iso", 1 },
@@ -324,9 +325,7 @@ char *ChooseDistribution(void)
 
 void CheckDevices(void)
 {
-	return; // BSD doesn't have lsblk
-
-/*	char buf[8192] = { 0 };
+	char buf[8192] = { 0 };
 	char result[8192] = { 0 };
 	FILE *f = popen("/bin/lsblk", "r");
 	if (!f) {
@@ -342,7 +341,7 @@ void CheckDevices(void)
 	}
 
 	pclose(f);
-*/
+
 }
 
 char *ChooseDevice(void)
