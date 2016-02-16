@@ -277,32 +277,22 @@ char *ChooseDistribution(void)
 		int is_ssl;
 	};
 	
-	#define NUM_DISTROS 13
 
+	char *timestamp = "2016-02-16";
 
-	char *timestamp = "2015-06-10";
-
-	struct distro_t distros[NUM_DISTROS] = {
-		{"NetBSD v6.1.5 (x86)", "http://mirror.planetunix.net/pub/NetBSD/iso/6.1.5/NetBSD-6.1.5-i386.iso", 0},
-		{"NetBSD v6.1.5 (x86_64)", "http://mirror.planetunix.net/pub/NetBSD/iso/6.1.5/NetBSD-6.1.5-amd64.iso", 0},
-		{"OpenBSD v5.7 (x86)", "http://mirror.ox.ac.uk/pub/OpenBSD/5.7/i386/install57.fs", 0},
-		{"OpenBSD v5.7 (x86_64)", "http://mirror.ox.ac.uk/pub/OpenBSD/5.7/amd64/install57.fs", 0},
-		{"FreeBSD v10.1 (x86)", "http://ftp.freebsd.org/pub/FreeBSD/releases/ISO-IMAGES/10.1/FreeBSD-10.1-RELEASE-i386-memstick.img", 0},
-		{"FreeBSD v10.1 (x86_64)", "http://ftp.freebsd.org/pub/FreeBSD/releases/ISO-IMAGES/10.1/FreeBSD-10.1-RELEASE-amd64-memstick.img", 0},		
-		{"Debian v8.1 (x86/x86_64)", "http://ftp.acc.umu.se/debian-cd/8.1.0/multi-arch/iso-cd/debian-8.1.0-amd64-i386-netinst.iso", 0}, 
-		{"Fedora v22 (x86)", "http://download.fedoraproject.org/pub/fedora/linux/releases/22/Workstation/i386/iso/Fedora-Live-Workstation-i686-22-3.iso", 0},		
-		{"Fedora v22 (x86_64)", "http://download.fedoraproject.org/pub/fedora/linux/releases/22/Workstation/x86_64/iso/Fedora-Live-Workstation-x86_64-22-3.iso", 0},		
-		{"OpenSUSE v13.2 (x86)", "http://anorien.csc.warwick.ac.uk/mirrors/download.opensuse.org/distribution/13.2/iso/openSUSE-13.2-DVD-i586.iso", 0},
-		{"OpenSUSE v13.2 (x86_64)","http://anorien.csc.warwick.ac.uk/mirrors/download.opensuse.org/distribution/13.2/iso/openSUSE-13.2-DVD-x86_64.iso", 0},
-		{"LinuxMint v17.1 [Cinammon] (x86)", "https://mirrors.kernel.org/linuxmint//stable/17.1/linuxmint-17.1-cinnamon-32bit.iso", 1 },
-		{"LinuxMint v17.1 [Cinammon] (x86_64)", "https://mirrors.kernel.org/linuxmint//stable/17.1/linuxmint-17.1-cinnamon-64bit.iso", 1},
+	#define COUNT 4
+	struct distro_t distros[COUNT] = {
+		{"OpenBSD v5.8 (i386)", "http://mirror.ox.ac.uk/pub/OpenBSD/5.7/i386/install57.fs", 0},
+		{"OpenBSD v5.8 (amd64)", "http://mirror.ox.ac.uk/pub/OpenBSD/5.7/amd64/install57.fs", 0},
+		{"OpenBSD v5.9 (snapshot) (i386)", "http://mirror.ox.ac.uk/pub/OpenBSD/snapshots/i386/install59.fs", 0},
+		{"OpenBSD v5.9 (snapshot) (amd64)", "http://mirror.ox.ac.uk/pub/OpenBSD/snapshots/amd64/install59.fs", 0},
+		
 	};
 
 	int i;
 
 	printf("Brought to you by: \"Al Poole\" <netstar@gmail.com>. Updated %s.\n\n", timestamp);
-	printf("\nPlease choose an operating system to install to disk or file:\n\n");
-	for (i = 0; i < NUM_DISTROS; i++) {
+	for (i = 0; i < COUNT; i++) {
 		printf("%2.1d) %s\n", i, distros[i].name);
 	}
 
@@ -316,7 +306,7 @@ char *ChooseDistribution(void)
 
 	int choice = atoi(buffer);
 	
-	if (choice < 0 || choice > NUM_DISTROS)
+	if (choice < 0 || choice > COUNT)
 		Scream("Choice out of range!");	
 
 	char *url = strdup(distros[choice].URL);
