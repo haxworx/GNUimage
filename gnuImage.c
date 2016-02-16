@@ -42,9 +42,9 @@ void Scream(char *fmt, ...)
 	va_list ap;
 
 	va_start(ap, fmt);
-	snprintf(buf, sizeof(buf), "Nooo! %s\n", fmt);
+	vsnprintf(buf, sizeof(buf), fmt, ap);
 	va_end(ap);
-	fprintf(stderr, buf);
+	fprintf(stderr,"%s\n", buf);
 
 	exit(EXIT_FAILURE);
 }
@@ -61,7 +61,7 @@ void Say(char *phrase)
 	char buf[1024] = { 0 };
 
 	snprintf(buf, sizeof(buf), "%s\n", phrase);
-	printf(buf);
+	puts(buf);
 }
 
 BIO *Connect_SSL(char *hostname, int port)
@@ -321,7 +321,6 @@ void CheckDevices(void)
 	if (!f) {
 		return;
 	}
-	
 
 	while (fgets(buf, sizeof(buf), f)) {
 		if (strncmp(buf, "NAME", 4) && sscanf(buf, "%s disk", result))	{
