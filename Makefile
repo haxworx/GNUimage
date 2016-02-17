@@ -1,15 +1,13 @@
 CFLAGS=-g -Wall -pedantic -std=c99
-OUTFILE=gnuImage
-INSTALL_DESTINATION=/usr/local/bin
+LDFLAGS= -lssl -lcrypto
+SOURCES=newimage.c
+OUTFILE=newimage
+INSTALL_PREFIX=/usr/local
 
 default:
-	gcc $(CFLAGS) gnuImage.c -lssl -lcrypto -o $(OUTFILE)
-
+	$(CC) $(CFLAGS) $(LDFLAGS) $(SOURCES) -o $(OUTFILE)
 clean:
-	rm $(OUTFILE)
-
+	-rm $(OUTFILE) 
+	-rm *.iso *.fs
 install:
-	make default
-	-cp $(OUTFILE) $(INSTALL_DESTINATION)
-	-chmod +x $(INSTALL_DESTINATION)/$(OUTFILE)
-	echo "Done!!!"
+	-install -m 0755 $(OUTFILE) $(INSTALL_PREFIX)/bin
