@@ -279,19 +279,19 @@ char *choose_an_os(void)
         int is_ssl;
     };
 
-    char *timestamp = "2016-02-16";
+    char *timestamp = "2016-04-14";
 
     #define COUNT 9
     struct distro_t distros[] = {
-        {"Debian GNU/Linux v8.3 (i386/amd64)", "http://gensho.acc.umu.se/debian-cd/8.3.0/multi-arch/iso-cd/debian-8.3.0-amd64-i386-netinst.iso", 0},
-        {"FreeBSD v10.2 (x86)", "http://ftp.freebsd.org/pub/FreeBSD/releases/ISO-IMAGES/10.2/FreeBSD-10.2-RELEASE-i386-memstick.img", 0},
-        {"FreeBSD v10.2 (amd64)", "http://ftp.freebsd.org/pub/FreeBSD/releases/ISO-IMAGES/10.2/FreeBSD-10.2-RELEASE-amd64-memstick.img", 0},
+        {"Debian GNU/Linux v8.4 (i386/amd64)", "http://gensho.acc.umu.se/debian-cd/8.4.0/multi-arch/iso-cd/debian-8.4.0-amd64-i386-netinst.iso", 0},
+        {"FreeBSD v10.3 (x86)", "http://ftp.freebsd.org/pub/FreeBSD/releases/ISO-IMAGES/10.3/FreeBSD-10.3-RELEASE-i386-memstick.img", 0},
+        {"FreeBSD v10.3 (amd64)", "http://ftp.freebsd.org/pub/FreeBSD/releases/ISO-IMAGES/10.3/FreeBSD-10.3-RELEASE-amd64-memstick.img", 0},
         {"NetBSD v7.0 (i386)", "http://mirror.planetunix.net/pub/NetBSD/iso/7.0/NetBSD-7.0-i386.iso", 0},
         {"NetBSD v7.0 (amd64)", "http://mirror.planetunix.net/pub/NetBSD/iso/7.0/NetBSD-7.0-amd64.iso", 0},
-        {"OpenBSD v5.8 (i386)", "http://mirror.ox.ac.uk/pub/OpenBSD/5.7/i386/install57.fs", 0},
-        {"OpenBSD v5.8 (amd64)", "http://mirror.ox.ac.uk/pub/OpenBSD/5.7/amd64/install57.fs", 0},
-        {"OpenBSD v5.9 (snapshot) (i386)", "http://mirror.ox.ac.uk/pub/OpenBSD/snapshots/i386/install59.fs", 0},
-        {"OpenBSD v5.9 (snapshot) (amd64)", "http://mirror.ox.ac.uk/pub/OpenBSD/snapshots/amd64/install59.fs", 0},
+        {"OpenBSD v5.9 (i386)", "http://mirror.ox.ac.uk/pub/OpenBSD/5.9/i386/install59.fs", 0},
+        {"OpenBSD v5.9 (amd64)", "http://mirror.ox.ac.uk/pub/OpenBSD/5.9/amd64/install59.fs", 0},
+        {"OpenBSD v6.0 (snapshot) (i386)", "http://mirror.ox.ac.uk/pub/OpenBSD/snapshots/i386/install60.fs", 0},
+        {"OpenBSD v6.0 (snapshot) (amd64)", "http://mirror.ox.ac.uk/pub/OpenBSD/snapshots/amd64/install60.fs", 0},
         
     };
 
